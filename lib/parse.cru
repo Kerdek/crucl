@@ -1,4 +1,4 @@
-{ err, fail, ret, take, either, eof, exact, skip, expect, anychar, seqchar, one_or_more, zero_or_more } where (
+{ err, fail, ret, take, either, eof, char, skip, expect, anychar, seqchar, one_or_more, zero_or_more } where (
 
 string = #"string.cru",
 sfold = #"sfold.cru",
@@ -11,14 +11,14 @@ ret    r    s y n f = y r s,
 take   a b  s y n f = a s (\r t -> b r t y n f) n f,
 either a b  s y n f = a s y (b s y n f) f,
 eof         s y n f = logic.if (string.empty s) (y "" s) n,
-exact  x    s y n f = sfold.list s (\a b -> logic.if (arith.eq a x) (y a b) n) n,
+char  x     s y n f = sfold.list s (\a b -> logic.if (arith.eq a x) (y a b) n) n,
 
 skip a b = take a \_ -> b,
 
 expect e m = either e (err m),
 
-anychar = sfold.foldr (\a b -> either (exact a) b) fail,
-seqchar x = sfold.foldr (\a b -> skip (exact a) b) (ret x) x,
+anychar = sfold.r (\a b -> either (char a) b) fail,
+seqchar x = sfold.r (\a b -> skip (char a) b) (ret x) x,
 
 one_or_more x = rec
   where (

@@ -1,3 +1,0 @@
-io.print [...["hi"]].[0]
-  where (
-    io = #"io.cru")

@@ -1,4 +1,4 @@
-{ r, l } where (
+{ r, l, list } where (
 
 logic = #"logic.cru",
 string = #"string.cru",
