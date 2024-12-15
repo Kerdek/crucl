@@ -1,0 +1,27 @@
+{ cons, foldr, foldl, map, to_tuple, first } where (
+
+arith = #"arith.cru",
+tuple = #"tuple.cru",
+fold = #"fold.cru",
+logic = #"logic.cru",
+
+if = logic.if,
+or = logic.or,
+eq = arith.eq,
+sub = arith.sub,
+
+cons a b = [a, b],
+
+list s a b = if (tuple.empty s) b (a s.[0] s.[1]),
+
+foldg = fold list,
+foldr = foldg.r,
+foldl = foldg.l,
+
+map f = foldr (\a b -> [f a, b]) [],
+
+to_tuple = foldr tuple.cons [],
+
+first n l =
+  if (or (tuple.empty l) (eq n 0)) [] $
+  [l.[0], first (sub n 1) l.[1]])

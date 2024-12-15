@@ -17,7 +17,7 @@ export const visit_branch = o => e => (f => () => f(e))(o[e[0]]);
 export function tokenizer(s) {
     let t;
     function fatal(msg) {
-        throw new Error(`(${s.pos()}): tokenizer: ${msg}`);
+        throw new Error(`(${s.pos()[0]}:${s.pos()[1]}:${s.pos()[2]}): tokenizer: ${msg}`);
     }
     function k(t) {
         const matches = s.get().match(t);
@@ -159,18 +159,23 @@ export function tokenizer(s) {
 const di = (x, f) => f(x);
 const includes = {};
 export const read = tk => async_homproc((call, ret) => {
-    const fatal = m => { throw new Error(`(${tk.pos()}): parser: ${m}`); }, include = async () => {
+    const fatal = m => { throw new Error(`(${tk.pos()[0]}:${tk.pos()[1]}:${tk.pos()[2]}): parser: ${m}`); }, include = async () => {
         let ru = tk.take("literal");
         if (ru === undefined || typeof ru[1] !== "string") {
             fatal("Expected a string.");
         }
         const wp = tk.pos();
-        const r = path.dirname(wp[0]) + "/" + JSON.parse(ru[1]);
+        const r = path.normalize(path.dirname(wp[0]) + "/" + JSON.parse(ru[1]));
         const m = includes[r];
         if (m) {
             return ret(make("shr", m));
         }
-        tk.unget(`${await readFile(r)})`);
+        try {
+            tk.unget(`${await readFile(r)})`);
+        }
+        catch (e) {
+            fatal(`Error while reading input file \`${r}\`: ${e.message}`);
+        }
         tk.unpos([r, 1, 1]);
         return call(expression, async (e) => {
             tk.take("rparen");
@@ -311,15 +316,7 @@ export const builtins = await (async () => {
         __builtin_acosh: unary(Math.acosh),
         __builtin_asinh: unary(Math.asinh),
         __builtin_atanh: unary(Math.atanh),
-        __builtin_sempty: unary(x => x.length === 0),
-        __builtin_slength: unary(x => x.length),
-        __builtin_shead: unary(x => x[0]),
-        __builtin_stail: unary(x => x.substring(1)),
-        __builtin_sinit: unary(x => x.substring(0, x.length - 1)),
-        __builtin_slast: unary(x => x[x.length - 1]),
-        __builtin_jsonstringify: unary(JSON.stringify),
-        __builtin_jsonparse: unary(JSON.parse),
-        __builtin_console: nullary(console),
+        __builtin_stringify: unary(JSON.stringify),
     };
 })();
 export const bubble = e => homproc((call, ret) => {
@@ -384,9 +381,10 @@ export const evaluate = e => homproc((call, ret) => {
         shr: e => call(s(e[1][0]), dx => (e[1][0] = dx, ret(dx))),
         var: ([, i]) => di(builtins[i], r => r ? ret(r) : (() => { throw new Error(`Undefined reference to \`${i}\`.`); })()),
         acs: ([, x, y]) => call(s(x), dx => call(s(y), dy => dy[0] !== "lit" || typeof dy[1] !== "string" && typeof dy[1] !== "number" ? (() => { throw new Error(`Expected a string or number instead of \`${print(dy)}\` on rhs of subscript.`); })() :
-            dx[0] !== "lit" || typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record or list instead of \`${print(dx)}\` on lhs of subscript.`); })() :
+            dx[0] !== "lit" || typeof dx[1] !== "string" && typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record, list, or string instead of \`${print(dx)}\` on lhs of subscript.`); })() :
                 di(dx[1][dy[1]], j => j === undefined ? (() => { throw new Error(`\`${dy[1]}\` is not a property of \`${print(dx)}\`.`); })() :
-                    call(s(j[0]), dj => (j[0] = dj, ret(dj)))))),
+                    typeof dx[1] === "string" ? ret(make("lit", j[0])) :
+                        call(s(j[0]), dj => (j[0] = dj, ret(dj)))))),
         rec: ([, x]) => jmp(r(x, {})),
         lst: ([, x]) => jmp(l(x, [])),
         abs: ret,

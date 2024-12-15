@@ -91,7 +91,7 @@ export function tokenizer(s: Scanner): Tokenizer {
   let t!: Token
 
   function fatal(msg: string): never {
-    throw new Error(`(${s.pos()}): tokenizer: ${msg}`) }
+    throw new Error(`(${s.pos()[0]}:${s.pos()[1]}:${s.pos()[2]}): tokenizer: ${msg}`) }
 
   function k(t: RegExp) {
     const matches = s.get().match(t);
@@ -166,17 +166,20 @@ const includes: { [i: string]: Ptr } = {}
 
 export const read: Read = tk => async_homproc((call, ret) => {
 const
-fatal: Fatal = m => { throw new Error(`(${tk.pos()}): parser: ${m}`) },
+fatal: Fatal = m => { throw new Error(`(${tk.pos()[0]}:${tk.pos()[1]}:${tk.pos()[2]}): parser: ${m}`) },
 include: AsyncProcess = async () => {
   let ru = tk.take("literal")
   if (ru === undefined || typeof ru[1] !== "string") {
     fatal("Expected a string.") }
   const wp: Pos = tk.pos()
-  const r = path.dirname(wp[0]) + "/" + JSON.parse(ru[1])
+  const r = path.normalize(path.dirname(wp[0]) + "/" + JSON.parse(ru[1]))
   const m = includes[r]
   if (m) {
     return ret(make("shr", m)) }
-  tk.unget(`${await readFile(r)})`)
+  try {
+    tk.unget(`${await readFile(r)})`) }
+  catch (e) {
+    fatal(`Error while reading input file \`${r}\`: ${(e as Error).message}`) }
   tk.unpos([r, 1, 1])
   return call(expression, async e => {
     tk.take("rparen")
@@ -386,15 +389,7 @@ return {
   __builtin_acosh: unary(Math.acosh),
   __builtin_asinh: unary(Math.asinh),
   __builtin_atanh: unary(Math.atanh),
-  __builtin_sempty: unary(x => x.length === 0),
-  __builtin_slength: unary(x => x.length),
-  __builtin_shead: unary(x => x[0]),
-  __builtin_stail: unary(x => x.substring(1)),
-  __builtin_sinit: unary(x => x.substring(0, x.length - 1)),
-  __builtin_slast: unary(x => x[x.length - 1]),
-  __builtin_jsonstringify: unary(JSON.stringify),
-  __builtin_jsonparse: unary(JSON.parse),
-  __builtin_console: nullary(console), } })()
+  __builtin_stringify: unary(JSON.stringify), } })()
 
 export const bubble: Bubble = e => homproc((call, ret) => {
 const s: SavProcess = e => () => call(visit_branch({
@@ -460,9 +455,10 @@ const s: GraphProcess = visit_branch({
     call(s(x), dx =>
     call(s(y), dy =>
     dy[0] !== "lit" || typeof dy[1] !== "string" && typeof dy[1] !== "number" ? (() => { throw new Error(`Expected a string or number instead of \`${print(dy)}\` on rhs of subscript.`)})() :
-    dx[0] !== "lit" || typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record or list instead of \`${print(dx)}\` on lhs of subscript.`)})() :
+    dx[0] !== "lit" || typeof dx[1] !== "string" && typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record, list, or string instead of \`${print(dx)}\` on lhs of subscript.`)})() :
     di((dx[1] as any)[dy[1]], j =>
     j === undefined ? (() => { throw new Error(`\`${dy[1]}\` is not a property of \`${print(dx)}\`.`)})() :
+    typeof dx[1] === "string" ? ret(make("lit", j[0])) :
     call(s(j[0]), dj => (j[0] = dj, ret(dj)))))),
   rec: ([, x]) => jmp(r(x, {})),
   lst: ([, x]) => jmp(l(x, [])),

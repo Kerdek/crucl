@@ -1,28 +1,4 @@
 let
-  io = #"io.cru",
-  arith = #"arith.cru",
-  logic = #"logic.cru",
-  tuple = #"tuple.cru",
-// comment "hi"
-/* comment "hi" */
-  do = io.do,
-  return = io.return,
-  print = io.print,
-  add = arith.add,
-  sub = arith.sub,
-  eq = arith.eq,
-  if = logic.if,
-  or = logic.or,
-  empty = tuple.empty,
-
-  first n l =
-    if (or (empty l) (eq n 0)) [] $
-    [l.[0], first (sub n 1) l.[1]],
-  fibab a b = [a, fibab b (add a b)],
-  fib = fibab 0 1,
-  print_list l =
-    if (empty l) (return true) $
-    do (print l.[0]) $
-    print_list l.[1] in
-
-print_list (first 10 fib)
+fibab a b = [a, fibab b (#"arith.cru".add a b)]
+in
+fibab 0 1

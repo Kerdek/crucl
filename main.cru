@@ -1,0 +1,14 @@
+let
+
+io = #"lib/io.cru",
+tuple = #"lib/tuple.cru",
+stringify = #"lib/stringify.cru",
+list = #"lib/list.cru",
+fib = #"lib/fib.cru",
+queue = #"lib/queue.cru",
+
+print = io.print
+
+in
+
+print (queue.pop (queue.push 10 (queue.push 20 queue.new)))

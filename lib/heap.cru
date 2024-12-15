@@ -4,8 +4,7 @@ pre = #"pre.cru",
 arith = #"arith.cru",
 logic = #"logic.cru",
 tuple = #"tuple.cru",
-tfold = #"tfold.cru",
-// comment
+
 id = pre.id,
 car = pre.car,
 add = arith.add,
@@ -46,10 +45,10 @@ push cond x h =
   if (lt h.lhs.size h.rhs.size) push_left $
   push_right,
 
-heapify cond = tfold.r (push cond) undefined,
+heapify fold cond = fold (push cond) undefined,
 
-unheapify cond = tfold.unr (\h -> if (eq h undefined) [] $ pop cond h),
+unheapify unfold cond = unfold (\h -> if (eq h undefined) [] $ pop cond h),
 
-sort cond l = unheapify cond (heapify cond l)
+sort fold unfold cond l = unheapify unfold cond (heapify fold cond l)
 
 )

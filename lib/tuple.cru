@@ -1,4 +1,4 @@
-{ length, slice, empty, head, tail, map } where (
+{ cons, length, slice, empty, head, tail, map, join } where (
 
 arith = #"arith.cru",
 logic = #"logic.cru",
@@ -8,19 +8,44 @@ eq = arith.eq,
 add = arith.add,
 sub = arith.sub,
 
+cons a b = [a, ...b],
 length = __builtin_length,
 slice = __builtin_slice,
 head l = l.[0],
 tail l = slice l 1 (length l),
-empty l = arith.eq (length l) 0,
+empty l = eq (length l) 0,
 
-map f s =
+list s a b = if (empty s) b (a (head s) (tail s)),
+
+foldr g b s =
   let
     N = length s,
-    g n =
-      if (eq n N) [] $
-      [f s.[n], ...g (add n 1)] in
-  g 0
+    f n =
+      if (eq n N) b $
+      g s.[n] (f (add n 1)) in
+  f 0,
 
+foldl g b s =
+  let
+    N = length s,
+    f n =
+      if (eq n -1) b $
+      g s.[n] (f (sub n 1)) in
+  f (sub N 1),
+
+map f = foldr (\a b -> [f a, ...b]) [],
+
+unfoldr f =
+  let g l b =
+    let e = f b in
+    if (empty e) l $
+    g [...l, e.[0]] e.[1] in
+  g [],
+
+join c l =
+  if (empty l) "" $
+  add (head l) $ foldr nonempty "" (tail l)
+  where (
+    nonempty a b = add c $ add a b)
 
 )

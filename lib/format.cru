@@ -6,7 +6,6 @@ logic = #"logic.cru",
 arith = #"arith.cru",
 keys = #"keys.cru",
 tuple = #"tuple.cru",
-tfold = #"tfold.cru",
 
 add = arith.add,
 eq = arith.eq,
@@ -19,7 +18,7 @@ format x =
   if (is "function") "<function>" $
   if (is "null") "null" $
   if (is "undefined") "undefined" $
-  if (is "tuple") (add "[" $ add (join ", " (tuple.map format x)) $ "]") $
-  add "{ " $ add (join ", " (tuple.map (\key -> add key $ add ": " $ format x.[key]) (keys x))) $ " }"
+  if (is "tuple") (add "[" $ add (tuple.join ", " (tuple.map format x)) $ "]") $
+  add "{ " $ add (tuple.join ", " (tuple.map (\key -> add key $ add ": " $ format x.[key]) (keys x))) $ " }"
 
 )

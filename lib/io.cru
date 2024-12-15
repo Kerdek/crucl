@@ -1,13 +1,7 @@
-{ return, bind, do, print, put, process } where (
-
-pre = #"pre.cru",
-format = #"format.cru",
-
-cons = pre.cons,
-car = pre.car,
+{ return, bind, do, put, print } where (
 
 return x = ["return", x],
 bind x y = ["bind", x, y],
-do x y = bind x (car y),
+do x y = bind x (\_ -> y),
 put x = ["put", x],
-print x = put (format x))
+print x = put (#"format.cru" x))
