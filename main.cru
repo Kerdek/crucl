@@ -1,14 +1,16 @@
 let
 
+arith = #"lib/arith.cru",
 io = #"lib/io.cru",
 tuple = #"lib/tuple.cru",
 stringify = #"lib/stringify.cru",
 list = #"lib/list.cru",
 fib = #"lib/fib.cru",
-queue = #"lib/queue.cru",
+heap = #"lib/heap.cru",
 
-print = io.print
+print = io.print,
+gt = arith.gt
 
 in
 
-print (queue.pop (queue.push 10 (queue.push 20 queue.new)))
+print (heap.sort tuple.foldr tuple.unfoldr gt [6, 7, 3, 8, 5, 2, 1, 0, 4, 9])

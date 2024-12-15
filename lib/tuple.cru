@@ -1,4 +1,4 @@
-{ cons, length, slice, empty, head, tail, map, join } where (
+{ cons, length, slice, empty, head, tail, map, join, foldr, foldl, unfoldr } where (
 
 arith = #"arith.cru",
 logic = #"logic.cru",
@@ -38,7 +38,7 @@ map f = foldr (\a b -> [f a, ...b]) [],
 unfoldr f =
   let g l b =
     let e = f b in
-    if (empty e) l $
+    if (eq e undefined) l $
     g [...l, e.[0]] e.[1] in
   g [],
 

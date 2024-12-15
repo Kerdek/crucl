@@ -1,4 +1,4 @@
-{ pop, push, unheapify, heapify, sort } where (
+{ new, pop, push, unheapify, heapify, sort } where (
 
 pre = #"pre.cru",
 arith = #"arith.cru",
@@ -16,12 +16,14 @@ and = logic.and,
 if = logic.if,
 length = tuple.length,
 
+new = undefined,
+
 pop cond h =
   let
     new_node =
-      if (and (eq undefined h.lhs) (eq undefined h.rhs)) undefined $
-      if (eq undefined h.lhs) h.rhs $
-      if (eq undefined h.rhs) h.lhs $
+      if (and (eq new h.lhs) (eq new h.rhs)) new $
+      if (eq new h.lhs) h.rhs $
+      if (eq new h.rhs) h.lhs $
       let f a b c = let r = pop cond h.[a] in { value: r.[0], size: sub h.size 1, lhs: b r.[1], rhs: c r.[1] } in
       if (cond h.lhs.value h.rhs.value)
         (f "rhs" (car h.lhs) id)
@@ -29,7 +31,7 @@ pop cond h =
   [h.value, new_node],
 
 push cond x h =
-  if (eq h undefined) { value: x, size: 1, lhs: undefined, rhs: undefined } $
+  if (eq h new) { value: x, size: 1, lhs: new, rhs: new } $
   let
     select = if (cond h.value x),
     push_left =
@@ -40,14 +42,14 @@ push cond x h =
       select
         { value: x, size: add h.size 1, lhs: h.lhs, rhs: push cond h.value h.rhs }
         { value: h.value, size: add h.size 1, lhs: h.lhs, rhs: push cond x h.rhs } in
-  if (eq undefined h.lhs) push_left $
-  if (eq undefined h.rhs) push_right $
+  if (eq new h.lhs) push_left $
+  if (eq new h.rhs) push_right $
   if (lt h.lhs.size h.rhs.size) push_left $
   push_right,
 
-heapify fold cond = fold (push cond) undefined,
+heapify fold cond = fold (push cond) new,
 
-unheapify unfold cond = unfold (\h -> if (eq h undefined) [] $ pop cond h),
+unheapify unfold cond = unfold (\h -> if (eq h new) undefined $ pop cond h),
 
 sort fold unfold cond l = unheapify unfold cond (heapify fold cond l)
 
