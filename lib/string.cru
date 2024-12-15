@@ -23,6 +23,6 @@ join c l =
   if (tuple.empty l) "" $
   add (tuple.head l) $ tfold.r nonempty "" (tuple.tail l)
   where (
-    nonempty a b = add c $ add a b),
+    nonempty a b = add c $ add a b)
 
 )

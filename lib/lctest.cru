@@ -9,9 +9,7 @@ add = arith.add,
 prog = "(λf.(λx.f (x x)) (λx.f (x x))) (λfib a b f.f a (fib b (add a b))) z o",
 
 success r s =
-  io.do (io.put (lc.pretty r false true)) $
-  io.do (io.put "\n") $
-  io.print (lc.eval r { z: 0, o: 1, add } (\a b -> b) (\a b -> b) (\a b -> b) (\a b -> b) (\a b -> b) (\a b -> b) (\a b -> a)),
+  io.put (lc.pretty r false true),
 failure =
   io.put "no",
 error m s =

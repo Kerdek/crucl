@@ -37,7 +37,7 @@ read = all
     take = parse.take,
     skip = parse.skip,
     either = parse.either,
-    exact = parse.exact,
+    char = parse.char,
     err = parse.err,
     expect = parse.expect,
     ret = parse.ret,
@@ -49,7 +49,7 @@ read = all
     parameters =
       ws $
       either (
-        skip (exact ".") $
+        skip (char ".") $
         expression) $
       take (expect identifier "expected `.` or identifier.") \id ->
       take parameters \body ->
@@ -58,13 +58,13 @@ read = all
     primary =
       ws $
       either (
-        skip (exact "λ") $
+        skip (char "λ") $
         parameters) $
       either (
-        skip (exact "(") $
+        skip (char "(") $
         take expression \e ->
         ws $
-        skip (expect (exact ")") "expected `)`.") $
+        skip (expect (char ")") "expected `)`.") $
         ret e) $
       take identifier \id ->
       ret { kind: ref, id },
