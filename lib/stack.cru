@@ -1,0 +1,9 @@
+{ new, pop, push } where (
+
+tuple = #"tuple.cru",
+
+new = [],
+pop q = [tuple.head q, tuple.tail q],
+push x q = [x, ...q]
+
+)

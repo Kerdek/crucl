@@ -13,9 +13,11 @@ length = __builtin_length,
 slice = __builtin_slice,
 head l = l.[0],
 tail l = slice l 1 (length l),
+init l = slice l 0 (sub (length l) 1),
+last l = l.[sub (length l) 1],
 empty l = eq (length l) 0,
 
-list s a b = if (empty s) b (a (head s) (tail s)),
+uncons s a b = if (empty s) b (a (head s) (tail s)),
 
 foldr g b s =
   let

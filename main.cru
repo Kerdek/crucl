@@ -13,4 +13,4 @@ gt = arith.gt
 
 in
 
-print (heap.sort tuple.foldr tuple.unfoldr gt [6, 7, 3, 8, 5, 2, 1, 0, 4, 9])
+print (heap.unheapify tuple.unfoldr (heap.heapify tuple.foldr gt [6, 7, 3, 8, 5, 2, 1, 0, 4, 9]))

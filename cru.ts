@@ -454,8 +454,8 @@ const s: GraphProcess = visit_branch({
   acs: ([, x, y]) =>
     call(s(x), dx =>
     call(s(y), dy =>
-    dy[0] !== "lit" || typeof dy[1] !== "string" && typeof dy[1] !== "number" ? (() => { throw new Error(`Expected a string or number instead of \`${print(dy)}\` on rhs of subscript.`)})() :
-    dx[0] !== "lit" || typeof dx[1] !== "string" && typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record, list, or string instead of \`${print(dx)}\` on lhs of subscript.`)})() :
+    dy[0] !== "lit" || typeof dy[1] !== "string" && typeof dy[1] !== "number" ? (() => { throw new Error(`Expected a string or number instead of \`${print(dy)}\` on rhs of subscript with \`${print(dx)}\`.`)})() :
+    dx[0] !== "lit" || typeof dx[1] !== "string" && typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record, list, or string instead of \`${print(dx)}\` on lhs of subscript with \`${print(dy)}\`.`)})() :
     di((dx[1] as any)[dy[1]], j =>
     j === undefined ? (() => { throw new Error(`\`${dy[1]}\` is not a property of \`${print(dx)}\`.`)})() :
     typeof dx[1] === "string" ? ret(make("lit", j[0])) :
