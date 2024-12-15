@@ -263,9 +263,9 @@ export const print = visit({
     lst: () => `<list>`,
     rec: () => `<record>`
 });
-export const builtins = await (async () => {
+export const builtins = (() => {
     const nullary = op => make("lit", op);
-    const unary = op => make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("lit", op(dx[1])))));
+    const unary = op => make("blt", (call, ret, s, r) => call(s(r), dx => ret(nullary(op(dx[1])))));
     const binary = op => make("blt", (call, ret, s, r) => call(s(r), dx => ret(unary(y => op(dx[1], y)))));
     const ternary = op => make("blt", (call, ret, s, r) => call(s(r), dx => ret(binary((x, y) => op(dx[1], x, y)))));
     return {
@@ -274,6 +274,7 @@ export const builtins = await (async () => {
         __builtin_and: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? make("var", "x") : dx)))),
         __builtin_or: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? dx : make("var", "x"))))),
         __builtin_typeof: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("lit", dx[0] === "abs" || dx[0] === "blt" ? "function" : dx[0] === "ref" ? "reference" : Array.isArray(dx[1]) ? "tuple" : dx[1] === null ? "null" : typeof dx[1] === "object" ? "record" : typeof dx[1])))),
+        __builtin_argv: nullary(process.argv.slice(2).map(e => [make("lit", e)])),
         __builtin_keys: unary(x => Object.keys(x).map(x => [make("lit", x)])),
         __builtin_length: unary(x => x.length),
         __builtin_slice: ternary((x, y, z) => x.slice(y, z)),

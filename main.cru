@@ -1,16 +1,28 @@
 let
 
-arith = #"lib/arith.cru",
 io = #"lib/io.cru",
-tuple = #"lib/tuple.cru",
-stringify = #"lib/stringify.cru",
 list = #"lib/list.cru",
 fib = #"lib/fib.cru",
-heap = #"lib/heap.cru",
+argv = #"lib/argv.cru",
+format = #"lib/format.cru",
+tuple = #"lib/tuple.cru",
 
+fopen = io.fopen,
+fread = io.fread,
+fwrite = io.fwrite,
+fclose = io.fclose,
+bind = io.bind,
+do = io.do,
+buffer_to_string = io.buffer_to_string,
+buffer_from_string = io.buffer_from_string,
 print = io.print,
-gt = arith.gt
+put = io.put,
+new_buffer = io.new_buffer,
+slice_buffer = io.slice_buffer
 
 in
 
-print (heap.unheapify tuple.unfoldr (heap.heapify tuple.foldr gt [6, 7, 3, 8, 5, 2, 1, 0, 4, 9]))
+bind (fopen "output.txt" "w") \fd ->
+bind (buffer_from_string (tuple.join "\n" (list.to_tuple (list.first 1000 fib)))) \buf ->
+bind (fwrite fd buf) \result ->
+fclose fd

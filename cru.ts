@@ -6,7 +6,7 @@ import * as path from 'path'
 type App = ["app", Graph, Graph]
 type Abs = ["abs", string, Graph]
 type Var = ["var", string]
-type Lit = ["lit", string | number | boolean | null | undefined | Record | List]
+type Lit = ["lit", Value]
 type Rec = ["rec", RecordSyntax]
 type Lst = ["lst", ListSyntax]
 type Acs = ["acs", Graph, Graph]
@@ -16,6 +16,7 @@ type Sav = ["sav", Record, Graph]
 type Shr = ["shr", Ptr]
 type Blt = ["blt", BuiltinFunction]
 
+export type Value = string | number | boolean | null | undefined | void | Record | List
 export type RecordSyntax = ([false, Graph, Graph] | [true, Graph])[]
 export type ListSyntax = [boolean, Graph][]
 export type Normal = Abs | Lit | Ref | Blt
@@ -330,15 +331,15 @@ export const print: Print = visit({
   lst: () => `<list>`,
   rec: () => `<record>` })
 
-export const builtins: Builtins = await (async () => {
-const nullary: (op: any) => Normal = op => make("lit", op)
-const unary: (op: (x: any) => any) => Normal = op => make("blt", (call, ret, s, r) =>
+export const builtins: Builtins = (() => {
+const nullary: (op: Value) => Normal = op => make("lit", op)
+const unary: (op: (x: any) => Value) => Normal = op => make("blt", (call, ret, s, r) =>
   call(s(r), dx =>
-  ret(make("lit", op(dx[1])))))
-const binary: (op: (x: any, y: any) => any) => Normal = op => make("blt", (call, ret, s, r) =>
+  ret(nullary(op(dx[1])))))
+const binary: (op: (x: any, y: any) => Value) => Normal = op => make("blt", (call, ret, s, r) =>
   call(s(r), dx =>
   ret(unary(y => op(dx[1], y)))))
-const ternary: (op: (x: any, y: any, z: any) => any) => Normal = op => make("blt", (call, ret, s, r) =>
+const ternary: (op: (x: any, y: any, z: any) => Value) => Normal = op => make("blt", (call, ret, s, r) =>
   call(s(r), dx =>
   ret(binary((x, y) => op(dx[1], x, y)))))
 return {
@@ -347,6 +348,7 @@ return {
   __builtin_and: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? make("var", "x") : dx)))),
   __builtin_or: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? dx : make("var", "x"))))),
   __builtin_typeof: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("lit", dx[0] === "abs" || dx[0] === "blt" ? "function" : dx[0] === "ref" ? "reference" : Array.isArray(dx[1]) ? "tuple" : dx[1] === null ? "null" : typeof dx[1] === "object" ? "record" : typeof dx[1])))),
+  __builtin_argv: nullary(process.argv.slice(2).map(e => [make("lit", e)])),
   __builtin_keys: unary(x => Object.keys(x).map(x => [make("lit", x)] as Ptr)),
   __builtin_length: unary(x => x.length),
   __builtin_slice: ternary((x, y, z) => x.slice(y, z)),

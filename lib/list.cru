@@ -1,4 +1,4 @@
-{ cons, foldr, foldl, map, to_tuple, first } where (
+{ cons, head, tail, foldr, foldl, map, to_tuple, from_tuple, first } where (
 
 arith = #"arith.cru",
 tuple = #"tuple.cru",
@@ -8,9 +8,12 @@ logic = #"logic.cru",
 if = logic.if,
 or = logic.or,
 eq = arith.eq,
+add = arith.add,
 sub = arith.sub,
 
 cons a b = [a, b],
+head l = l.[0],
+tail l = l.[1],
 
 list s a b = if (tuple.empty s) b (a s.[0] s.[1]),
 
@@ -21,6 +24,7 @@ foldl = foldg.l,
 map f = foldr (\a b -> [f a, b]) [],
 
 to_tuple = foldr tuple.cons [],
+from_tuple = tuple.foldr cons [],
 
 first n l =
   if (or (tuple.empty l) (eq n 0)) [] $

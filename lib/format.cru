@@ -16,6 +16,7 @@ format x =
   let is = eq (typeof x) in
   if (or (is "boolean") $ or (is "number") $ is "string") (stringify x) $
   if (is "function") "<function>" $
+  if (is "reference") "<reference>" $
   if (is "null") "null" $
   if (is "undefined") "undefined" $
   if (is "tuple") (add "[" $ add (tuple.join ", " (tuple.map format x)) $ "]") $

@@ -1,4 +1,4 @@
-{ cons, length, slice, empty, head, tail, map, join, foldr, foldl, unfoldr } where (
+{ cat, cons, length, slice, empty, head, tail, map, join, foldr, foldl, unfoldr } where (
 
 arith = #"arith.cru",
 logic = #"logic.cru",
@@ -8,6 +8,7 @@ eq = arith.eq,
 add = arith.add,
 sub = arith.sub,
 
+cat a b = [...a, ...b],
 cons a b = [a, ...b],
 length = __builtin_length,
 slice = __builtin_slice,

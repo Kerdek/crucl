@@ -1,7 +1,15 @@
-{ return, bind, do, put, print } where (
+{ return, bind, do, put, print, new_buffer, buffer_to_string, buffer_from_string, slice_buffer, fopen, fread, fwrite, fclose } where (
 
 return x = ["return", x],
 bind x y = ["bind", x, y],
 do x y = bind x (\_ -> y),
 put x = ["put", x],
-print x = put (#"format.cru" x))
+print x = put (#"format.cru" x),
+new_buffer x = ["new_buffer", x],
+buffer_to_string x = ["buffer_to_string", x],
+buffer_from_string x = ["buffer_from_string", x],
+slice_buffer x y z = ["slice_buffer", x, y, z],
+fopen path mode = ["fopen", path, mode],
+fread fd buf = ["fread", fd, buf],
+fwrite fd buf = ["fwrite", fd, buf],
+fclose fd = ["fclose", fd])
