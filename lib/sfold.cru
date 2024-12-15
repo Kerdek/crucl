@@ -1,0 +1,10 @@
+{ r, l } where (
+
+logic = #"logic.cru",
+string = #"string.cru",
+gfold = #"gfold.cru",
+
+list s a b = logic.if (string.empty s) b (a (string.head s) (string.tail s)),
+
+r = gfold.r list,
+l = gfold.l list)

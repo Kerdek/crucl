@@ -1,0 +1,26 @@
+{ length, slice, empty, head, tail, map } where (
+
+arith = #"arith.cru",
+logic = #"logic.cru",
+
+if = logic.if,
+eq = arith.eq,
+add = arith.add,
+sub = arith.sub,
+
+length = __builtin_length,
+slice = __builtin_slice,
+head l = l.[0],
+tail l = slice l 1 (length l),
+empty l = arith.eq (length l) 0,
+
+map f s =
+  let
+    N = length s,
+    g n =
+      if (eq n N) [] $
+      [f s.[n], ...g (add n 1)] in
+  g 0
+
+
+)

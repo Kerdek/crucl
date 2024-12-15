@@ -1,0 +1,23 @@
+#"pre.cru"\id di car cdr cons head tail compose composer ->
+#"builtin_arithmetic.cru"\neg cpl mul div mod add sub shl shr eq neq gt ge lt le bcj bxj bdj ->
+#"data.cru"\emptymaybe maybe emptylist list ->
+
+export
+  where (
+    export f = f foldr foldl length reverse sum cat,
+
+    foldr g b = rec
+      where (
+        rec l = list l nonempty b,
+        nonempty x y = g x (rec y)),
+
+    foldl g = rec
+      where (
+        rec b l = list l nonempty b
+          where (
+            nonempty x y = rec (g x b) y)),
+
+    reverse = foldl cons cdr,
+    sum = foldr add 0,
+    cat = foldr add "",
+    length = foldr (\_ b -> add 1 b) 0)

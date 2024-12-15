@@ -1,0 +1,22 @@
+{
+
+neg: __builtin_neg,
+cpl: __builtin_cpl,
+mul: __builtin_mul,
+div: __builtin_div,
+mod: __builtin_mod,
+add: __builtin_add,
+sub: __builtin_sub,
+shl: __builtin_shl,
+shr: __builtin_shr,
+eq: __builtin_eq,
+neq: __builtin_neq,
+gt: __builtin_gt,
+ge: __builtin_ge,
+lt: __builtin_lt,
+le: __builtin_le,
+bcj: __builtin_bcj,
+bxj: __builtin_bxj,
+bdj: __builtin_bdj
+
+}

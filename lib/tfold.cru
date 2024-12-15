@@ -1,0 +1,26 @@
+{ r, unr } where (
+
+logic = #"logic.cru",
+tuple = #"tuple.cru",
+arith = #"arith.cru",
+
+length = tuple.length,
+empty = tuple.empty,
+if = logic.if,
+eq = arith.eq,
+add = arith.add,
+
+r g b s =
+  let
+    N = length s,
+    f n =
+      if (eq n N) b $
+      g s.[n] (f (add n 1)) in
+  f 0,
+
+unr f =
+  let g l b =
+    let e = f b in
+    if (empty e) l $
+    g [...l, e.[0]] e.[1] in
+  g [])

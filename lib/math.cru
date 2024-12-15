@@ -1,0 +1,23 @@
+{
+
+  pi: __builtin_pi,
+  ceil: __builtin_ceil,
+  floor: __builtin_floor,
+  sqrt: __builtin_sqrt,
+  pow: __builtin_pow,
+  exp: __builtin_exp,
+  log: __builtin_log,
+  sin: __builtin_sin,
+  cos: __builtin_cos,
+  tan: __builtin_tan,
+  asin: __builtin_asin,
+  acos: __builtin_acos,
+  atan: __builtin_atan,
+  sinh: __builtin_sinh,
+  cosh: __builtin_cosh,
+  tanh: __builtin_tanh,
+  asinh: __builtin_asinh,
+  acosh: __builtin_acosh,
+  atanh: __builtin_atanh
+
+}

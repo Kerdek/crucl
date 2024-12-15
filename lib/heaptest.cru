@@ -1,0 +1,11 @@
+let
+  heap = #"heap.cru",
+  io = #"io.cru",
+  arith = #"arith.cru",
+
+  lt = arith.lt,
+  gt = arith.gt
+
+in
+
+io.print (heap.sort gt [6, 0, 8, 3, 4, 1, 7, 5, 2, 9])

@@ -1,0 +1,86 @@
+{ pretty, read, eval } where (
+
+arith = #"arith.cru",
+logic = #"logic.cru",
+parse = #"parse.cru",
+
+add = arith.add,
+eq = arith.eq,
+if = logic.if,
+or = logic.or,
+not = logic.not,
+
+parens c s = if c (add "(" $ add s $ ")") s,
+
+params e =
+  if (eq e.kind abs) (add " " $ add e.id $ params e.body) $
+  add "." $ pretty e false true,
+
+abs = {
+  eval e o x: eval e.body { ...o, [e.id]: x },
+  pretty e p r: parens (not r) (add "λ" $ add e.id $ params e.body) },
+
+app = {
+  eval e o: eval e.lhs o (eval e.rhs o),
+  pretty e p r: parens p (add (pretty e.lhs false false) $ add " " $ pretty e.rhs true (or p r)) },
+
+ref = {
+  eval e o: o.[e.id],
+  pretty e p r: e.id },
+
+pretty e p r = e.kind.pretty e p r,
+eval e o = e.kind.eval e o,
+
+read = all
+  where (
+
+    take = parse.take,
+    skip = parse.skip,
+    either = parse.either,
+    exact = parse.exact,
+    err = parse.err,
+    expect = parse.expect,
+    ret = parse.ret,
+    eof = parse.eof,
+
+    identifier = parse.one_or_more (parse.anychar "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"),
+    ws = skip $ parse.zero_or_more (parse.anychar " \t\n"),
+
+    parameters =
+      ws $
+      either (
+        skip (exact ".") $
+        expression) $
+      take (expect identifier "expected `.` or identifier.") \id ->
+      take parameters \body ->
+      ret { kind: abs, id, body },
+
+    primary =
+      ws $
+      either (
+        skip (exact "λ") $
+        parameters) $
+      either (
+        skip (exact "(") $
+        take expression \e ->
+        ws $
+        skip (expect (exact ")") "expected `)`.") $
+        ret e) $
+      take identifier \id ->
+      ret { kind: ref, id },
+
+    juxt lhs =
+      either (
+        take primary \rhs ->
+        juxt { kind: app, lhs, rhs }) $
+      ret lhs,
+
+    expression =
+      take (expect primary "expected expression.") \lhs ->
+      juxt lhs,
+
+    all =
+      take expression \e ->
+      ws $
+      skip (expect eof "expected eof.") $
+      ret e))
