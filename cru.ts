@@ -13,8 +13,8 @@ type Acs = ["acs", Graph, Graph]
 type Ref = ["ref", Reference]
 type Mod = ["mod", Module, Graph]
 type Sav = ["sav", Record, Graph]
-type Shr = ["shr", Ptr]
-type Blt = ["blt", BuiltinFunction]
+type Shr = ["shr", Ptr, string]
+type Blt = ["blt", BuiltinFunction, ...Graph[]]
 
 export type Reference = Object | Array<any>
 export type Value = string | number | boolean | null | undefined | void | Record | List
@@ -177,7 +177,7 @@ include: AsyncProcess = async () => {
   const r = path.normalize(path.dirname(wp[0]) + "/" + JSON.parse(ru[1]))
   const m = includes[r]
   if (m) {
-    return ret(make("shr", m)) }
+    return ret(make("shr", m, `#"${r}"`)) }
   try {
     tk.unget(`${await readFile(r)})`) }
   catch (e) {
@@ -188,7 +188,7 @@ include: AsyncProcess = async () => {
     tk.unpos(wp)
     const m: Ptr = [e]
     includes[r] = m
-    return ret(make("shr", m)) }) },
+    return ret(make("shr", m, `#"${r}"`)) }) },
 lst_elems: ListSyntaxAsyncProcess = l => async () =>
   await di(tk.take("dots"), async is_splat =>
   call(expression, async e =>
@@ -321,13 +321,13 @@ export const print: Print = visit({
   acs: () => `<access>`,
   lit: ([, c]) =>
   // rec: ([, o]) => `{ ${Object.keys(o).map(k => `${k}: ${print((o[k] as Ptr)[0])}`).join(', ')} }` })
-    Array.isArray(c) ? `[${c.map(e => print(e[0])).join(', ')}]` :
-    typeof c === "object" && c !== null ? `{ ${Object.keys(c).map(k => `${k}: ${print((c[k] as Ptr)[0])}`).join(', ')} }` :
+    Array.isArray(c) ? `[${c.map(_ => "").join(', ')}]` :
+    typeof c === "object" && c !== null ? `{ ${Object.keys(c).map(k => `${k}`).join(', ')} }` :
     typeof c === "undefined" ? "undefined" :
     JSON.stringify(c),
   sav: () => `<save>`,
   ref: () => `<reference>`,
-  shr: () => `<shared>`,
+  shr: ([,, d]) => d,
   blt: () => `<built-in>`,
   lst: () => `<list>`,
   rec: () => `<record>` })
@@ -343,7 +343,9 @@ const binary: (op: (x: any, y: any) => Value) => Normal = op => make("blt", (cal
 const ternary: (op: (x: any, y: any, z: any) => Value) => Normal = op => make("blt", (call, ret, s, r) =>
   call(s(r), dx =>
   ret(binary((x, y) => op(dx[1], x, y)))))
+const monad: (v: Graph[]) => Normal = v => make("blt", (_call, ret, _s, r) => ret(monad([...v, r])), ...v)
 return {
+  __builtin_monad: monad([]),
   __builtin_rec: make("blt", (_call, _ret, s, r) => (e => (e[2] = e, jmp(s(e))))(make("app", r, undefined as unknown as Graph))),
   __builtin_if: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "y", make("abs", "z", make("var", dx[1] ? "y" : "z")))))),
   __builtin_and: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? make("var", "x") : dx)))),
@@ -410,7 +412,7 @@ const s: SavProcess = e => () => call(visit_branch({
   acs: y => ret(make("acs", make("sav", e[1], y[1]), make("sav", e[1], y[2]))),
   var: y => {
     const u = e[1][y[1]]
-    return ret(u === undefined ? y : make("shr", u)) },
+    return ret(u === undefined ? y : make("shr", u, y[1])) },
   rec: y => ret(make<Rec>("rec", y[1].map(a => a[0] ?
     [true, make("sav", e[1], a[1])] :
     [false, make("sav", e[1], a[1]), make("sav", e[1], a[2])]))),
@@ -460,9 +462,9 @@ const s: GraphProcess = visit_branch({
     dy[0] !== "lit" || typeof dy[1] !== "string" && typeof dy[1] !== "number" ? (() => { throw new Error(`Expected a string or number instead of \`${print(dy)}\` on rhs of subscript with \`${print(dx)}\`.`)})() :
     dx[0] !== "lit" || typeof dx[1] !== "string" && typeof dx[1] !== "object" || dx[1] === null ? (() => { throw new Error(`Expected a record, list, or string instead of \`${print(dx)}\` on lhs of subscript with \`${print(dy)}\`.`)})() :
     di((dx[1] as any)[dy[1]], j =>
-    j === undefined ? (() => { throw new Error(`\`${dy[1]}\` is not a property of \`${print(dx)}\`.`)})() :
+    j === undefined ? (() => { throw new Error(`\`${print(y)}\` (aka \`${dy[1]}\`) is not a property of \`${print(x)}\` (aka \`${print(dx)}\`).`)})() :
     typeof dx[1] === "string" ? ret(make("lit", j[0])) :
-    call(s(j[0]), dj => (j[0] = dj, ret(dj)))))),
+    jmp(s(make("shr", j, "<object access>")))))),
   rec: ([, x]) => jmp(r(x, {})),
   lst: ([, x]) => jmp(l(x, [])),
   abs: ret,

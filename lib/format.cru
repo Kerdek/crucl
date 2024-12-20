@@ -9,9 +9,20 @@ add = arith.add,
 eq = arith.eq,
 if = logic.if,
 
+insert s a =
+  if (tuple.empty s) "%" $
+  let
+    heads = tuple.head s,
+    rtaila = rest (tuple.tail a),
+    rest = format (tuple.tail s) in
+  if (eq heads "v") (
+    add (to_string (tuple.head a)) rtaila) $
+  if (eq heads "s") (
+    add (tuple.head a) rtaila) $
+  add "%" $ add heads $ add (rest a),
+
 format s a =
   if (tuple.empty s) "" $
-  let first = tuple.head s in
-  if (eq first "%") (
-    add (to_string (tuple.head a)) (format (tuple.tail s) (tuple.tail a))) $
-  add first (format (tuple.tail s) a))
+  let head = tuple.head s, tails = tuple.tail s in
+  if (eq head "%") (insert tails a) $
+  add head (format tails a))
