@@ -1,4 +1,0 @@
-let
-fibab a b = [a, fibab b (#"arith.cru".add a b)]
-in
-fibab 0 1

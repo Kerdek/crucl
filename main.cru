@@ -1,28 +1,41 @@
 let
 
+arith = #"lib/arith.cru",
+logic = #"lib/logic.cru",
 io = #"lib/io.cru",
 list = #"lib/list.cru",
-fib = #"lib/fib.cru",
+sequences = #"lib/sequences.cru",
 argv = #"lib/argv.cru",
 format = #"lib/format.cru",
 tuple = #"lib/tuple.cru",
+heap = #"lib/heap.cru",
+queue = #"lib/queue.cru",
+stack = #"lib/stack.cru",
 
-fopen = io.fopen,
-fread = io.fread,
-fwrite = io.fwrite,
-fclose = io.fclose,
+add = arith.add,
+if = logic.if,
+return = io.return,
+create_read_stream = io.create_read_stream,
+create_write_stream = io.create_write_stream,
+read_stream_all = io.read_stream_all,
+split_stream = io.split_stream,
+write_stream = io.write_stream,
+close_stream = io.close_stream,
 bind = io.bind,
 do = io.do,
+poke = io.poke,
+peek = io.peek,
 buffer_to_string = io.buffer_to_string,
 buffer_from_string = io.buffer_from_string,
 print = io.print,
 put = io.put,
 new_buffer = io.new_buffer,
-slice_buffer = io.slice_buffer
+slice_buffer = io.slice_buffer,
+lt = arith.lt,
+gt = arith.gt
 
 in
 
-bind (fopen "output.txt" "w") \fd ->
-bind (buffer_from_string (tuple.join "\n" (list.to_tuple (list.first 1000 fib)))) \buf ->
-bind (fwrite fd buf) \result ->
-fclose fd
+bind (bind (create_read_stream "input.txt") io.make_unit_read_stream) \i ->
+bind (i.read) \v ->
+print v

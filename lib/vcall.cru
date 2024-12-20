@@ -1,5 +1,0 @@
-vcall where (
-
-vcall x f = x.__table.[f] x
-
-)

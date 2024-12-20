@@ -1,15 +1,129 @@
-{ return, bind, do, put, print, new_buffer, buffer_to_string, buffer_from_string, slice_buffer, fopen, fread, fwrite, fclose } where (
+{
+  ...sequencing,
+  ...references,
+  ...printing,
+  ...buffers,
+  ...streams } where (
+
+arith = #"arith.cru",
+logic = #"logic.cru",
+tuple = #"tuple.cru",
+
+eq = arith.eq,
+if = logic.if,
+or = logic.or,
+
+sequencing = { return, bind, do },
 
 return x = ["return", x],
 bind x y = ["bind", x, y],
 do x y = bind x (\_ -> y),
+
+references = { new, get, set },
+
+new x = ["new", x],
+get x = ["get", x],
+set x y = ["set", x, y],
+
+printing = { put, print, printf },
+
 put x = ["put", x],
-print x = put (#"format.cru" x),
+print x = put (#"to_string.cru" x),
+printf s a = put (#"format.cru" s a),
+
+buffers = { new_buffer, buffer_to_string, buffer_from_string, slice, concat_buffers, get_length, poke, peek },
+
 new_buffer x = ["new_buffer", x],
 buffer_to_string x = ["buffer_to_string", x],
 buffer_from_string x = ["buffer_from_string", x],
-slice_buffer x y z = ["slice_buffer", x, y, z],
-fopen path mode = ["fopen", path, mode],
-fread fd buf = ["fread", fd, buf],
-fwrite fd buf = ["fwrite", fd, buf],
-fclose fd = ["fclose", fd])
+slice x y z = ["slice", x, y, z],
+concat_buffers x = ["concat_buffers", x],
+get_length buf = ["get_length", buf],
+peek buf idx = ["peek", buf, idx],
+poke buf idx val = ["poke", buf, idx, val],
+
+streams = { create_write_stream, create_read_stream, make_unit_read_stream, split_stream },
+
+create_read_stream path =
+  bind ["create_read_stream", path] \fd ->
+  return {
+    read: ["read_stream", fd],
+    read_size size: ["read_stream_size", fd, size],
+    close: ["close_stream", fd] },
+
+create_write_stream path =
+  bind ["create_write_stream", path] \fd ->
+  return {
+    write buf: ["write_stream", fd, buf],
+    close: ["close_stream", fd] },
+
+make_unit_read_stream stream =
+  bind (bind (new_buffer 0) new) \bufr ->
+  bind (new 0) \idxr ->
+  let
+    read =
+      bind (get bufr) \buf ->
+      if (eq buf null) (return null) $
+      bind (get_length buf) \size ->
+      bind (get idxr) \idx ->
+      if (eq size idx) (
+        bind stream.read \new_buf ->
+        do (set bufr new_buf) $
+        do (set idxr 0) $
+        read) $
+      bind (peek buf idx) \v ->
+      do (set idxr (add idx 1)) $
+      return v in
+  return { read },
+
+make_char_read_stream stream =
+  bind (new "") \bufr ->
+  bind (new 0) \idxr ->
+  let
+    read =
+      bind (get bufr) \buf ->
+      if (eq bufr null) (return null) $
+      bind (get_length buf) \size ->
+      bind (get idxr) \idx ->
+      if (eq size idx) (
+        bind stream.read \new_buf ->
+        do (set bufr new_buf) $
+        do (set idxr 0) $
+        read) $
+      bind (peek buf idx) \v ->
+      do (set idxr (add idx 1)) $
+      return v in
+    return {
+      read,
+      close: stream.close },
+
+read_stream_until c s =
+  let
+    f buf =
+      bind (s.read_size 1) \part ->
+      if (eq null part) (return buf) $
+      bind (peek part 0) \part0 ->
+      if (eq c part0) (return buf) $
+      bind (concat_buffers [buf, part]) f in
+  bind (s.read_size 1) \part ->
+  if (eq null part) (return null) $
+  bind (peek part 0) \part0 ->
+  if (eq c part0) (return buf) $
+  f part,
+
+split_stream c s i f =
+  let g e =
+    bind (read_stream_until c s) \part ->
+    if (eq part null) (return e) $
+    bind (f part e) g in
+  g i,
+
+read_stream_all s =
+  let
+    f buf =
+      bind s.read \part ->
+      if (eq null part) (return buf) $
+      bind (concat_buffers [buf, part]) f in
+  bind s.read \part ->
+  if (eq null part) (return null) $
+  f part)

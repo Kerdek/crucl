@@ -1,4 +1,4 @@
-{ cat, cons, length, slice, empty, head, tail, map, join, foldr, foldl, unfoldr } where (
+{ cat, cons, length, slice, empty, head, tail, uncons, reverse, map, for_each, join, split, foldr, foldl, unfoldr } where (
 
 arith = #"arith.cru",
 logic = #"logic.cru",
@@ -36,7 +36,11 @@ foldl g b s =
       g s.[n] (f (sub n 1)) in
   f (sub N 1),
 
+reverse = foldl cons [],
+
 map f = foldr (\a b -> [f a, ...b]) [],
+
+for_each v f = foldr (\a b -> do (f a) $ b) (return undefined) v,
 
 unfoldr f =
   let g l b =
@@ -49,6 +53,13 @@ join c l =
   if (empty l) "" $
   add (head l) $ foldr nonempty "" (tail l)
   where (
-    nonempty a b = add c $ add a b)
+    nonempty a b = add c $ add a b),
 
-)
+split d s = uncons s (nonempty new) new
+  where (
+    new = init [],
+    init a = ["", ...a],
+    nonempty p a b = uncons b (nonempty pp) (reverse pp)
+      where (
+        pp = if (eq a d) (init p) [add (head p) a, ...tail p],
+        merge x y = [add x a, ...y])))

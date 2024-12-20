@@ -1,10 +1,13 @@
-{ cons, head, tail, foldr, foldl, map, to_tuple, from_tuple, first } where (
+{ cons, head, tail, foldr, foldl, map, for_each, to_tuple, from_tuple, take, split } where (
 
 arith = #"arith.cru",
 tuple = #"tuple.cru",
 fold = #"fold.cru",
 logic = #"logic.cru",
+io = #"io.cru",
 
+return = io.return,
+do = io.do,
 if = logic.if,
 or = logic.or,
 eq = arith.eq,
@@ -15,17 +18,28 @@ cons a b = [a, b],
 head l = l.[0],
 tail l = l.[1],
 
-list s a b = if (tuple.empty s) b (a s.[0] s.[1]),
+uncons s a b = if (tuple.empty s) b (a s.[0] s.[1]),
 
-foldg = fold list,
+foldg = fold uncons,
 foldr = foldg.r,
 foldl = foldg.l,
 
 map f = foldr (\a b -> [f a, b]) [],
 
+for_each v f = foldr (\a b -> do (f a) $ b) (return undefined) v,
+
 to_tuple = foldr tuple.cons [],
 from_tuple = tuple.foldr cons [],
 
-first n l =
+take n l =
   if (or (tuple.empty l) (eq n 0)) [] $
-  [l.[0], first (sub n 1) l.[1]])
+  [l.[0], take (sub n 1) l.[1]],
+
+split d s = tuple.uncons s (nonempty new) new
+  where (
+    new = init [],
+    init a = ["", a],
+    nonempty p a b = tuple.uncons b (nonempty pp) (reverse pp)
+      where (
+        pp = if (eq a d) (init p) [add (head p) a, tail p],
+        merge x y = [add x a, y])))

@@ -1,0 +1,13 @@
+{ nat, fib, triangle, factorial } where (
+
+arith = #"arith.cru",
+
+add = arith.add,
+mul = arith.mul,
+
+nat = let f a = [a, f (add a 1)] in f 0,
+fib = let f a b = [a, f b (add a b)] in f 0 1,
+triangle = let f a b = [a, f (add a b) (add b 1)] in f 0 1,
+factorial = let f a b = [a, f (mul a b) (add b 1)] in f 1 1
+
+)

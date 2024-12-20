@@ -6,10 +6,10 @@ arith = #"arith.cru",
 
 add = arith.add,
 
-prog = "(λf.(λx.f (x x)) (λx.f (x x))) (λfib a b f.f a (fib b (add a b))) z o",
+prog = "(λf.(λx.f (x x)) (λx.f (x x))) (λfib a b f.f a (fib b (add a b))) z o (λa b.b) (λa b.b) (λa b.b) (λa b.b) (λa b.b) (λa b.b) (λa b.b) (λa b.b) (λa b.b) (λa b.a)",
 
 success r s =
-  io.put (lc.pretty r false true),
+  io.print (lc.eval r { add, z: 0, o: 1 }),
 failure =
   io.put "no",
 error m s =

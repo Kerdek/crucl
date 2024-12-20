@@ -1,8 +1,9 @@
-{ new, empty, pop, push, unheapify, heapify, sort } where (
+new where (
 
 pre = #"pre.cru",
 arith = #"arith.cru",
 logic = #"logic.cru",
+tuple = #"tuple.cru",
 
 id = pre.id,
 car = pre.car,
@@ -14,50 +15,46 @@ eq = arith.eq,
 and = logic.and,
 if = logic.if,
 
-new cond = { cond, head: undefined },
-
-empty h = eq h.head undefined,
-
-pop h =
+new cond =
   let
-    f e =
+    make cond =
       let
-        new_node =
-          if (and (eq undefined e.lhs) (eq undefined e.rhs)) undefined $
-          if (eq undefined e.lhs) e.rhs $
-          if (eq undefined e.rhs) e.lhs $
-          let f a b c = let r = f e.[a] in { value: r.[0], size: sub e.size 1, lhs: b r.[1], rhs: c r.[1] } in
-          if (h.cond e.lhs.value e.rhs.value)
-            (f "rhs" (car e.lhs) id)
-            (f "lhs" id (car e.rhs)) in
-      [e.value, new_node],
-    result = f h.head in
-  [result.[0], { cond: h.cond, head: result.[1] }],
+        pop head =
+          let
+            new_node =
+              if (and (eq undefined head.lhs) (eq undefined head.rhs)) undefined $
+              if (eq undefined head.lhs) head.rhs $
+              if (eq undefined head.rhs) head.lhs $
+              let g a b c = let r = pop head.[a] in {
+                value: r.[0],
+                size: sub head.size 1,
+                lhs: b r.[1],
+                rhs: c r.[1] } in
+              if (cond head.lhs.value head.rhs.value)
+                (g "rhs" (car head.lhs) id)
+                (g "lhs" id (car head.rhs)) in
+          [head.value, new_node],
 
-push x h =
-  let
-    f x e =
-      if (eq e undefined) { value: x, size: 1, lhs: undefined, rhs: undefined } $
-      let
-        select = if (h.cond e.value x),
-        push_left =
-          select
-            { value: x, size: add e.size 1, lhs: f e.value e.lhs, rhs: e.rhs }
-            { value: e.value, size: add e.size 1, lhs: f x e.lhs, rhs: e.rhs },
-        push_right =
-          select
-            { value: x, size: add e.size 1, lhs: e.lhs, rhs: f e.value e.rhs }
-            { value: e.value, size: add e.size 1, lhs: e.lhs, rhs: f x e.rhs } in
-      if (eq undefined e.lhs) push_left $
-      if (eq undefined e.rhs) push_right $
-      if (lt e.lhs.size e.rhs.size) push_left $
-      push_right in
-  { cond: h.cond, head: f x h.head },
+        push head x =
+          if (eq head undefined) { value: x, size: 1, lhs: undefined, rhs: undefined } $
+          let
+            select = if (cond head.value x),
+            size = add head.size 1,
+            push_left =
+              select
+                { value: x, size, lhs: push head.lhs head.value, rhs: head.rhs }
+                { value: head.value, size, lhs: push head.lhs x, rhs: head.rhs },
+            push_right =
+              select
+                { value: x, size, lhs: head.lhs, rhs: push head.rhs head.value }
+                { value: head.value, size, lhs: head.lhs, rhs: push head.rhs x } in
+          if (eq undefined head.lhs) push_left $
+          if (eq undefined head.rhs) push_right $
+          if (lt head.lhs.size head.rhs.size) push_left $
+          push_right,
 
-heapify fold cond = fold push (new cond),
-
-unheapify unfold = unfold (\h -> if (empty h) undefined $ pop h),
-
-sort fold unfold cond l = unheapify unfold (heapify fold cond l)
-
-)
+        makep head =
+          let empty = eq head undefined in
+          { empty, push x: makep (push head x), ...if empty {} (let r = pop head in { peek: r.[0], pop: makep r.[1] }) } in
+      makep in
+  make cond undefined)

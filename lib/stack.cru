@@ -1,9 +1,10 @@
-{ new, pop, push } where (
-
-tuple = #"tuple.cru",
-
-new = [],
-pop q = [tuple.head q, tuple.tail q],
-push x q = [x, ...q]
-
-)
+let
+  none f g = g,
+  make head =
+    let
+      some x f g = f x head,
+      on_empty = { empty: true, ...push_part },
+      on_nonempty a b = { empty: false, ...push_part, peek: a, pop: make b },
+      push_part = { push x: make (some x) } in
+    head on_nonempty on_empty in
+make none

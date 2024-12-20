@@ -10,12 +10,13 @@ type Lit = ["lit", Value]
 type Rec = ["rec", RecordSyntax]
 type Lst = ["lst", ListSyntax]
 type Acs = ["acs", Graph, Graph]
-type Ref = ["ref", Object | Array<any>]
+type Ref = ["ref", Reference]
 type Mod = ["mod", Module, Graph]
 type Sav = ["sav", Record, Graph]
 type Shr = ["shr", Ptr]
 type Blt = ["blt", BuiltinFunction]
 
+export type Reference = Object | Array<any>
 export type Value = string | number | boolean | null | undefined | void | Record | List
 export type RecordSyntax = ([false, Graph, Graph] | [true, Graph])[]
 export type ListSyntax = [boolean, Graph][]
@@ -347,7 +348,7 @@ return {
   __builtin_if: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "y", make("abs", "z", make("var", dx[1] ? "y" : "z")))))),
   __builtin_and: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? make("var", "x") : dx)))),
   __builtin_or: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("abs", "x", dx[1] ? dx : make("var", "x"))))),
-  __builtin_typeof: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("lit", dx[0] === "abs" || dx[0] === "blt" ? "function" : dx[0] === "ref" ? "reference" : Array.isArray(dx[1]) ? "tuple" : dx[1] === null ? "null" : typeof dx[1] === "object" ? "record" : typeof dx[1])))),
+  __builtin_typeof: make("blt", (call, ret, s, r) => call(s(r), dx => ret(make("lit", dx[0] === "abs" || dx[0] === "blt" ? "function" : dx[0] === "ref" ? "reference" : Array.isArray(dx[1]) ? "tuple" : typeof dx[1] === "object" ? "record" : typeof dx[1])))),
   __builtin_argv: nullary(process.argv.slice(2).map(e => [make("lit", e)])),
   __builtin_keys: unary(x => Object.keys(x).map(x => [make("lit", x)] as Ptr)),
   __builtin_length: unary(x => x.length),

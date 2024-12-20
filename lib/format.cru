@@ -1,25 +1,17 @@
 format where (
 
-typeof = #"typeof.cru",
-stringify = #"stringify.cru",
-logic = #"logic.cru",
+to_string = #"to_string.cru",
 arith = #"arith.cru",
-keys = #"keys.cru",
+logic = #"logic.cru",
 tuple = #"tuple.cru",
 
 add = arith.add,
 eq = arith.eq,
 if = logic.if,
-or = logic.or,
 
-format x =
-  let is = eq (typeof x) in
-  if (or (is "boolean") $ or (is "number") $ is "string") (stringify x) $
-  if (is "function") "<function>" $
-  if (is "reference") "<reference>" $
-  if (is "null") "null" $
-  if (is "undefined") "undefined" $
-  if (is "tuple") (add "[" $ add (tuple.join ", " (tuple.map format x)) $ "]") $
-  add "{ " $ add (tuple.join ", " (tuple.map (\key -> add key $ add ": " $ format x.[key]) (keys x))) $ " }"
-
-)
+format s a =
+  if (tuple.empty s) "" $
+  let first = tuple.head s in
+  if (eq first "%") (
+    add (to_string (tuple.head a)) (format (tuple.tail s) (tuple.tail a))) $
+  add first (format (tuple.tail s) a))

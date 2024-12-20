@@ -1,11 +1,12 @@
-{
+{ id, di, car, cdr, cons, head, tail, empty, compose, composer } where (
 
-id x: x,
-di x f: f x,
-car a b: a,
-cdr a b: b,
-cons a b f: f a b,
-compose f g x: f (g x),
-composer f g x: g (f x)
-
-}
+id x = x,
+di x f = f x,
+car a b = a,
+cdr a b = b,
+cons a b f = f a b,
+head x = x car,
+tail x = x cdr,
+empty x = x (\_ _ _ -> false) true,
+compose f g x = f (g x),
+composer f g x = g (f x))

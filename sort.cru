@@ -1,0 +1,37 @@
+let
+
+arith = #"lib/arith.cru",
+logic = #"lib/logic.cru",
+io = #"lib/io.cru",
+heap = #"lib/heap.cru",
+
+add = arith.add,
+if = logic.if,
+return = io.return,
+bind = io.bind,
+do = io.do,
+create_read_stream = io.create_read_stream,
+create_write_stream = io.create_write_stream,
+split_stream = io.split_stream,
+write_stream = io.write_stream,
+close_stream = io.close_stream,
+buffer_to_string = io.buffer_to_string,
+buffer_from_string = io.buffer_from_string,
+gt = arith.gt
+
+in
+
+bind (
+  bind (create_read_stream "input.txt") \i ->
+  bind (split_stream 10 i (heap gt) \part h ->
+    bind (buffer_to_string part) \text ->
+    return (h.push text)) \h ->
+  do (i.close) $
+  return h) \h ->
+bind (create_write_stream "output.txt") \o ->
+let loop h =
+  if (h.empty) (return undefined) $
+  do (bind (buffer_from_string (add h.peek "\n")) o.write) $
+  loop h.pop in
+do (loop h) $
+o.close

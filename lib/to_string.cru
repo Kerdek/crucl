@@ -1,0 +1,25 @@
+to_string where (
+
+typeof = #"typeof.cru",
+stringify = #"stringify.cru",
+logic = #"logic.cru",
+arith = #"arith.cru",
+keys = #"keys.cru",
+tuple = #"tuple.cru",
+
+add = arith.add,
+eq = arith.eq,
+if = logic.if,
+or = logic.or,
+
+to_string x =
+  let is = eq (typeof x) in
+  if (or (is "boolean") $ or (is "number") $ is "string") (stringify x) $
+  if (is "function") "<function>" $
+  if (is "reference") "<reference>" $
+  if (is "undefined") "undefined" $
+  if (is "tuple") (add "[" $ add (tuple.join ", " (tuple.map to_string x)) $ "]") $
+  if (eq x null) "null" $
+  add "{ " $ add (tuple.join ", " (tuple.map (\key -> add key $ add ": " $ to_string x.[key]) (keys x))) $ " }"
+
+)

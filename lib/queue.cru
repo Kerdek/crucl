@@ -1,9 +1,14 @@
-{ new, pop, push } where (
+let
+  make t =
+    let empty = tuple.empty t in {
+      empty,
+      push x: make [...t, x],
+      ...if empty {} { peek: tuple.head t, pop: make (tuple.tail t) } } in
+make []
+
+where (
 
 tuple = #"tuple.cru",
+logic = #"logic.cru",
 
-new = [],
-pop q = [tuple.head q, tuple.tail q],
-push x q = [...q, x]
-
-)
+if = logic.if)
