@@ -141,7 +141,7 @@ export function tokenizer(s: Scanner): Tokenizer {
     if (k(/^->/)) { t = ["arrow", "->"]; return }
     if (k(/^#/)) { t = ["hash", "#"]; return }
     if (k(/^\$/)) { t = ["dollar", "$"]; return }
-    let r = k(/^("([^"\\]|\\.)*($|")|[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|false|true|null|undefined)/)
+    let r = k(/^("([^"\\]|\\.)*($|")|[+-]?(?:\d+(?:\.\d+)?)(?:[eE][+-]?\d+)?|false|true|null|undefined)/)
     if (r) { t = ["literal", r]; return }
     r = k(/^[A-Za-z_][A-Za-z0-9_]*/)
     if (r === "where") { t = ["where", "where"]; return }
@@ -262,8 +262,10 @@ try_primary: () => Promise<AsyncProcess | null> = async () =>
 access_rhs: AsyncTermAsyncBranch = async x =>
   tk.take("dot") ?
     await di(tk.take("identifier"), async i =>
-    !i ? fatal("Expected an identifier.") :
-    access_rhs(make("acs", x, make("lit", i[1])))) :
+    i ? access_rhs(make("acs", x, make("lit", i[1]))) :
+    await di(tk.take("literal"), async i =>
+    i ? access_rhs(make("acs", x, make("lit", i[1]))) :
+    fatal("Expected a subscript."))) :
   tk.take("dotbracket") ?
     call(expression, async i =>
     !tk.take("rbracket") ? fatal(`Expected \`]\`.`) :

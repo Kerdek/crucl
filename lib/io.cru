@@ -5,11 +5,12 @@
 
 monad = __builtin_monad,
 
-sequencing = { return, bind, do },
+sequencing = { return, bind, do, pass },
 
 return = monad "return",
 bind = monad "bind",
 do x y = bind x (\_ -> y),
+pass = return undefined,
 
 references = { new, get, set },
 

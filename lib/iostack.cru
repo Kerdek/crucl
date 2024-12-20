@@ -1,0 +1,32 @@
+let
+
+io = #"io.cru",
+
+bind = io.bind,
+do = io.do,
+return = io.return,
+new = io.new,
+get = io.get,
+set = io.set,
+
+none f g = g,
+just x f g = f x,
+some x y f g = f x y,
+is_empty a = a (\_ _ -> false) true
+
+in
+
+bind (new none) \headr ->
+return {
+  empty:
+    bind (get headr) \head ->
+    return (is_empty head),
+  push x:
+    bind (get headr) \head ->
+    set headr (some x head),
+  pop:
+    bind (get headr) \head ->
+    return (head (\a b -> just b) none),
+  peek:
+    bind (get headr) \head ->
+    return (head (\a b -> just a) none) }

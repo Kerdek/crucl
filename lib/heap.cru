@@ -3,13 +3,11 @@ new where (
 pre = #"pre.cru",
 arith = #"arith.cru",
 logic = #"logic.cru",
-tuple = #"tuple.cru",
 
 id = pre.id,
 car = pre.car,
 add = arith.add,
 sub = arith.sub,
-ge = arith.ge,
 lt = arith.lt,
 eq = arith.eq,
 and = logic.and,

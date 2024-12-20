@@ -4,7 +4,27 @@ io = #"lib/io.cru",
 argv = #"lib/argv.cru",
 tuple = #"lib/tuple.cru",
 to_string = #"lib/to_string.cru",
+iostack = #"lib/iostack.cru",
+
+id x = x,
+
+bind = io.bind,
+do = io.do,
+return = io.return,
+pass = io.pass,
+new = io.new,
+set = io.set,
+get = io.get,
+print = io.print
 
 in
 
-io.printf "Welcome to CRU!\nargv: %s" [tuple.join " " $ tuple.map to_string argv]
+bind iostack \s ->
+do (s.push 100) $
+do (s.push 200) $
+bind s.peek \a ->
+do (bind s.pop \r -> r id pass) $
+bind s.peek \b ->
+do (s.pop id pass) $
+do (a print pass) $
+b print pass

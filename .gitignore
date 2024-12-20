@@ -2,4 +2,10 @@ node_modules/
 package-lock.json
 .vscode/
 cru.js
+main.js
+scanner.js
+run.js
 cru.js.map
+main.js.map
+scanner.js.map
+run.js.map
